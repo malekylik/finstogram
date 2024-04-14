@@ -1,0 +1,16 @@
+{
+  "name": "finstogram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "elm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "http-server --ssl -C ./dev/cert.pem -K ./dev/key.pem",
+    "build": "elm make src/Main.elm --output=dist/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
