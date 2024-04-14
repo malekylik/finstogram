@@ -1,35 +1,39 @@
-module Main exposing (..)
-
--- Press buttons to increment and decrement a counter.
---
--- Read how it works:
---   https://guide.elm-lang.org/architecture/buttons.html
---
-
+port module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, text)
-import Html.Events exposing (onClick)
-
-
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 -- MAIN
 
 
+main : Program () Model Msg
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.element
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }
+
+-- PORTS
 
 
+port messageReceiver : (String -> msg) -> Sub msg
 
 -- MODEL
 
 
-type alias Model = Int
+type alias Model =
+  { fcToken : String }
 
 
-init : Model
-init =
-  0
+init : () -> ( Model, Cmd Msg )
+init _ =
+  ( { fcToken = "" }
+  , Cmd.none
+  )
 
 
 
@@ -37,18 +41,33 @@ init =
 
 
 type Msg
-  = Increment
-  | Decrement
+  = RecvFCToken String
 
 
-update : Msg -> Model -> Model
+-- Use the `sendMessage` port when someone presses ENTER or clicks
+-- the "Send" button. Check out index.html to see the corresponding
+-- JS where this is piped into a WebSocket.
+--
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    Increment ->
-      model + 1
+    RecvFCToken message ->
+      ( { model | fcToken = message }
+      , Cmd.none
+      )
 
-    Decrement ->
-      model - 1
+
+
+-- SUBSCRIPTIONS
+
+
+-- Subscribe to the `messageReceiver` port to hear about messages coming in
+-- from JS. Check out the index.html file to see how this is hooked up to a
+-- WebSocket.
+--
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+  messageReceiver RecvFCToken
 
 
 
@@ -58,15 +77,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [
-      div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text "123" ]
-        , button [ onClick Increment ] [ text "+" ]
-        ],
-      div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (String.fromInt model) ]
-        , button [ onClick Increment ] [ text "+" ]
-        ]
+    [ h1 [] [ text "Facebook Token" ]
+    , span []
+        [text model.fcToken]
     ]

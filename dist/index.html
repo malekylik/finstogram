@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Main</title>
+  <script src="main.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        var app = Elm.Main.init({
+            node: document.getElementById('app')
+        });
+
+        window.fbAsyncInit = function() {
+        FB.init({
+            appId            : '764574395801171',
+            xfbml            : true,
+            version          : 'v19.0'
+        });
+
+        console.log('FB', FB);
+
+        let authResponse = null;
+
+        FB.login(function(response) {
+            console.log('response', response)
+            if (response.authResponse) {
+            console.log('Welcome!  Fetching your information.... ');
+            authResponse = response.authResponse;
+
+            app.ports.messageReceiver.send(JSON.stringify(authResponse));
+
+            FB.api('/me', function(response) {
+            console.log('Good to see you, ' + response.name + '.');
+            });
+            } else {
+            console.log('User cancelled login or did not fully authorize.');
+            }
+        });
+        };
+    </script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+</body>
+</html>
