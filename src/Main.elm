@@ -4,6 +4,7 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode exposing (Decoder, map2, field, string, decodeString)
 
 -- MAIN
 
@@ -24,24 +25,27 @@ port messageReceiver : (String -> msg) -> Sub msg
 
 -- MODEL
 
+type alias FacebookAuthInfo =
+    { userID : String
+    , accessToken : String
+    }
 
 type alias Model =
-  { fcToken : String }
+  { facebookAuthInfo : FacebookAuthInfo }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-  ( { fcToken = "" }
+  ( { facebookAuthInfo = FacebookAuthInfo "" "" }
   , Cmd.none
   )
-
-
 
 -- UPDATE
 
 
 type Msg
   = RecvFCToken String
+  -- | 
 
 
 -- Use the `sendMessage` port when someone presses ENTER or clicks
@@ -52,11 +56,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     RecvFCToken message ->
-      ( { model | fcToken = message }
+      ( { model | facebookAuthInfo = parseFacebookAuthInfo message }
       , Cmd.none
       )
-
-
 
 -- SUBSCRIPTIONS
 
@@ -78,6 +80,20 @@ view : Model -> Html Msg
 view model =
   div []
     [ h1 [] [ text "Facebook Token" ]
-    , span []
-        [text model.fcToken]
+    , div [] [text ("Access token " ++ model.facebookAuthInfo.accessToken)]
+    , div [] [text ("userID " ++  model.facebookAuthInfo.userID)]
     ]
+
+parseFacebookAuthInfo : String -> FacebookAuthInfo
+parseFacebookAuthInfo info =
+  case (decodeString decodeFacebookAuthInfo info) of
+      Err _ -> FacebookAuthInfo "" ""
+      Ok v -> v
+
+
+
+decodeFacebookAuthInfo : Decoder FacebookAuthInfo
+decodeFacebookAuthInfo =
+  map2 FacebookAuthInfo
+    (field "userID" string)
+    (field "accessToken" string)

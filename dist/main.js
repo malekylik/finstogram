@@ -5159,11 +5159,17 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Main$FacebookAuthInfo = F2(
+	function (userID, accessToken) {
+		return {accessToken: accessToken, userID: userID};
+	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{fcToken: ''},
+		{
+			facebookAuthInfo: A2($author$project$Main$FacebookAuthInfo, '', '')
+		},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$RecvFCToken = function (a) {
@@ -5174,18 +5180,35 @@ var $author$project$Main$messageReceiver = _Platform_incomingPort('messageReceiv
 var $author$project$Main$subscriptions = function (_v0) {
 	return $author$project$Main$messageReceiver($author$project$Main$RecvFCToken);
 };
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $author$project$Main$decodeFacebookAuthInfo = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Main$FacebookAuthInfo,
+	A2($elm$json$Json$Decode$field, 'userID', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'accessToken', $elm$json$Json$Decode$string));
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $author$project$Main$parseFacebookAuthInfo = function (info) {
+	var _v0 = A2($elm$json$Json$Decode$decodeString, $author$project$Main$decodeFacebookAuthInfo, info);
+	if (_v0.$ === 'Err') {
+		return A2($author$project$Main$FacebookAuthInfo, '', '');
+	} else {
+		var v = _v0.a;
+		return v;
+	}
+};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var message = msg.a;
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
-				{fcToken: message}),
+				{
+					facebookAuthInfo: $author$project$Main$parseFacebookAuthInfo(message)
+				}),
 			$elm$core$Platform$Cmd$none);
 	});
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$view = function (model) {
@@ -5202,11 +5225,18 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$text('Facebook Token')
 					])),
 				A2(
-				$elm$html$Html$span,
+				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(model.fcToken)
+						$elm$html$Html$text('Access token ' + model.facebookAuthInfo.accessToken)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('userID ' + model.facebookAuthInfo.userID)
 					]))
 			]));
 };
